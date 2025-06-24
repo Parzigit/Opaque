@@ -12,11 +12,15 @@ chrome.storage.local.get("articles", ({ articles }) => {
     articleDiv.innerHTML = `
       <h2>${latest.header}</h2>
       <p class="timestamp">🕒Saved on ${new Date(latest.savedAt).toLocaleString()}</p>
-      <div class="content">
-        ${latest.para.map(p => `<p>${p}</p>`).join("")}
-        ${latest.img.map(src => `<img src="${src}" />`).join("")}
-      </div>
     `;
+    latest.cont.forEach(block=>{
+      if(block.type=="text"){
+        articleDiv.innerHTML += `<p>${block.value}</p>`;
+      }
+      else if(block.type=="image"){
+        articleDiv.innerHTML += `<img src="${block.value}" style="max-width:100%; margin:10px 0;"/>`;
+      }
+    });
     container.appendChild(articleDiv);
     document.getElementById("export-html").addEventListener("click", () => {
       const blob = new Blob([document.documentElement.outerHTML], { type: "text/html" });
@@ -27,7 +31,11 @@ chrome.storage.local.get("articles", ({ articles }) => {
     });
   
     document.getElementById("export-md").addEventListener("click", () => {
-      const md = `# ${latest.header}\n\n` + latest.para.join('\n\n');
+      const md = `# ${latest.header}\n\n` +
+      latest.cont
+        .filter(block => block.type === "text")
+        .map(block => block.value)
+        .join('\n\n');
       const blob = new Blob([md], { type: "text/markdown" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);

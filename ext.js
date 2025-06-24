@@ -28,7 +28,7 @@ function speakFromIndex(tabId, index = 0, rate = 1) {
 
       const paragraphs = [...document.querySelectorAll("article p")]
         .map(p => p.textContent.trim())
-        .filter(p => p && !/^(\d+|Medium Staff highlighted|Top highlight|Listen|Share|More|K|\d+\.\d+K|\d+\.\d+)$/i.test(p));
+        .filter(p => p && !/^(\d+|Medium Staff highlighted|Top highlight|Listen|Share|More|K|Responses|\d+\.\d+K|\d+\.\d+)$/i.test(p));
 
       const fullText = paragraphs.join(" ");
       const wordList = fullText.split(/\s+/);
@@ -111,14 +111,28 @@ document.getElementById("save-btn").addEventListener("click", () => {
         target: { tabId: tab.id },
         func: () => {
           const header = document.querySelector("h1")?.innerText || "Untitled";
-          const para = [...document.querySelectorAll("article p")]
-            .map(p => p.innerText.trim())
-            .filter(p => p && !/^(\d+|Medium Staff highlighted|Top highlight|Listen|Share|More|K|\d+\.\d+K|\d+\.\d+)$/i.test(p));
-          const img = [...document.querySelectorAll("article img")].map(img => img.src);
+          const cont = [];
+          const rem = /^(\d+|Medium Staff highlighted|Top highlight|Listen|Share|More|K|Responses|\d+\.\d+K|\d+\.\d+)$/i;
+          const article = document.querySelector("article");
+          if(article){
+            article.querySelectorAll("p,img").forEach(element=>{
+              if(element.tagName=="P"){
+                const text = element.innerText.trim();
+                if(text && !rem.test(text)){
+                  cont.push({type:"text",value:text});
+                }
+              }
+              else if(element.tagName=="IMG"){
+                const src=element.src;
+                if(src){
+                  cont.push({type:"image",value:src});
+                }
+              }
+            });
+          }
           const data = {
             header,
-            para,
-            img,
+            cont,
             savedAt:new Date().toISOString()
           };
           chrome.runtime.sendMessage({ type: "SAVE_ARTICLE_DATA", data });
