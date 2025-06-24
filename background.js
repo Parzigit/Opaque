@@ -1,5 +1,5 @@
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("MediumBuddy extension installed.");
+  console.log("Opaque extension installed.");
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
