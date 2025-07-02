@@ -112,7 +112,7 @@ document.getElementById("save-btn").addEventListener("click", () => {
         func: () => {
           const header = document.querySelector("h1")?.innerText || "Untitled";
           // const cont = [];
-          // const rem = /^(\d+|Medium Staff highlighted|Top highlight|Listen|Share|More|K|Responses|\d+\.\d+K|\d+\.\d+)$/i;
+          const rem = /^(\d+|Medium Staff highlighted|Top highlight|Listen|Share|More|K|Responses|\d+\.\d+K|\d+\.\d+)$/i;
           const article = document.querySelector("article");
           const contentBlocks = [];
           if(article){
@@ -120,23 +120,31 @@ document.getElementById("save-btn").addEventListener("click", () => {
               if(element.tagName === "IMG") {
                 contentBlocks.push({ type: "image", value: element.src });
               } 
+              else if(element.tagName === "P") {
+                const text=element.innerText.trim();
+                if(!rem.test(text) && text)contentBlocks.push({type:"text",value:text });
+              } 
               else if(element.tagName === "A") {
                 const text=element.innerText.trim();
                 const href=element.href;
                 if(href && text)contentBlocks.push({type:"link",value:{text,href }});
               } 
-              else if(["H2", "H3", "H4"].includes(element.tagName)) {
-                contentBlocks.push({ type: "heading", value: element.innerText.trim(), level: element.tagName });
+              else if(/^H[2-4]$/.test(element.tagName)) {
+                const header= element.innerText.trim();
+                if(header)
+                  contentBlocks.push({ type: "heading", value: header, level: element.tagName });
               } 
-              else if(element.tagName === "PRE" || element.tagName === "CODE") {
-                contentBlocks.push({ type: "code", value: element.innerText });
+              else if(element.tagName === "PRE" ) {
+                const code = element.textContent.trim();
+                if(code)
+                  contentBlocks.push({ type: "code", value: code });
               } 
-              else{
-                const html = element.innerHTML.trim(); // keeps <b>, <i>, etc.
-                if(html && !/^(\d+|Medium Staff highlighted|Top highlight|Listen|Share|More)$/i.test(html)) {
-                  contentBlocks.push({ type: "html", value: html });
-                }
-              }
+              // else{
+              //   const html = element.innerHTML.trim();
+              //   if(html && !/^(\d+|Medium Staff highlighted|Top highlight|Listen|Share|More)$/i.test(html)) {
+              //     contentBlocks.push({ type: "html", value: html });
+              //   }
+              // }
             });
           }
           const data = {
